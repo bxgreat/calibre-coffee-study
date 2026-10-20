@@ -17,6 +17,9 @@ const copy = (rel) => {
 };
 ["index.html", "manifest.webmanifest", "sw.js", "css", "js", "assets", "SOURCES.md", "IMAGE_SOURCES.md", "AUDIT_REPORT.md"].forEach(copy); // 3 berkas .md dirujuk halaman Info (transparansi sumber)
 
+// Resume perbandingan (Word) agar bisa diunduh lewat tautan publik
+const resume = path.join(root, "docs", "Dvin Al Ibad.docx");
+if (fs.existsSync(resume)) fs.copyFileSync(resume, path.join(out, "Dvin-Al-Ibad.docx"));
 fs.writeFileSync(path.join(out, ".nojekyll"), "");
 fs.writeFileSync(path.join(out, "robots.txt"), "# Rancangan studi desain independen, belum untuk diindeks.\nUser-agent: *\nDisallow: /\n");
 fs.writeFileSync(path.join(out, "404.html"), '<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Halaman tidak ditemukan</title><meta http-equiv="refresh" content="0; url=./?langsung"><p>Halaman tidak ditemukan. <a href="./?langsung">Kembali ke beranda</a>.</p></html>\n');
