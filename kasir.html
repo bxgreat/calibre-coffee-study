@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Panel kasir Calibre (uji)</title>
+  <style>
+    :root { --krem: #EEECE3; --arang: #292C25; --zaitun: #525B3E; --hijau: #BDC89E; --tanah: #995432; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 16px; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--krem); color: var(--arang); }
+    h1 { font-size: 1.5rem; margin: 0 0 8px; }
+    .bar { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 16px; align-items: center; }
+    input { min-height: 44px; padding: 0 12px; font: inherit; border: 2px solid var(--arang); border-radius: 4px; background: #fff; min-width: 0; }
+    button { min-height: 44px; padding: 0 14px; font: inherit; font-weight: 600; border: 2px solid var(--arang); border-radius: 4px; background: var(--krem); color: var(--arang); cursor: pointer; }
+    button.utama { background: var(--zaitun); border-color: var(--zaitun); color: #fff; }
+    button[aria-pressed="true"] { background: var(--arang); color: var(--krem); }
+    ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+    li.p { padding: 12px; border: 2px solid var(--arang); border-radius: 6px; background: #fff; display: grid; gap: 6px; }
+    .kode { font-weight: 800; font-size: 1.1rem; }
+    .st { display: inline-block; padding: 2px 10px; border-radius: 999px; background: var(--hijau); font-weight: 700; font-size: .875rem; }
+    .st--siap { background: var(--tanah); color: #fff; }
+    .st--batal { background: #8E2A1B; color: #fff; }
+    .aksi { display: flex; flex-wrap: wrap; gap: 6px; }
+    small, .kecil { color: #4A4E43; }
+    .err { color: #8E2A1B; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <h1>Panel kasir (uji)</h1>
+  <p class="kecil">Halaman internal untuk kedai. Masukkan alamat backend dan token admin; token hanya disimpan di tab ini (sessionStorage) dan tidak pernah dikirim ke tempat lain selain backend Anda.</p>
+  <div class="bar">
+    <label>Backend <input id="api" type="url" placeholder="http://127.0.0.1:8793" size="28"></label>
+    <label>Token <input id="tok" type="password" autocomplete="off" size="18"></label>
+    <button class="utama" id="muat" type="button">Muat pesanan</button>
+    <button id="auto" type="button" aria-pressed="false">Segarkan otomatis (10 dtk)</button>
+  </div>
+  <p id="info" class="kecil" role="status"></p>
+  <ul id="daftar"></ul>
+<script>
+(function () {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+  const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const idr = (n) => "Rp " + Math.round(n).toLocaleString("id-ID");
+  const LABEL = { diterima: "Diterima", diproses: "Diproses", siap: "Siap", selesai: "Selesai", batal: "Batal" };
+  let timer = 0;
+  try { $("#api").value = sessionStorage.getItem("kasir:api") || ""; $("#tok").value = sessionStorage.getItem("kasir:tok") || ""; } catch (_) {}
+  const base = () => $("#api").value.trim().replace(/\/$/, "");
+  const head = () => ({ Authorization: "Bearer " + $("#tok").value, "Content-Type": "application/json" });
+
+  async function muat() {
+    try { sessionStorage.setItem("kasir:api", $("#api").value); sessionStorage.setItem("kasir:tok", $("#tok").value); } catch (_) {}
+    const info = $("#info");
+    try {
+      const r = await fetch(base() + "/api/order", { headers: head() });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || r.status);
+      info.textContent = j.pesanan.length + " pesanan · penyimpanan: " + j.penyimpanan + " · " + new Date().toLocaleTimeString("id-ID");
+      info.className = "kecil";
+      $("#daftar").innerHTML = j.pesanan.map((p) => `<li class="p" data-kode="${esc(p.kode)}">
+        <div><span class="kode">${esc(p.kode)}</span> <span class="st st--${esc(p.status)}">${esc(LABEL[p.status] || p.status)}</span> <small>bayar: ${esc(p.bayar)}</small></div>
+        <div>${esc(p.nama)} · ${esc(p.hp)} · ${esc(p.mode)}${p.meja ? " meja " + esc(p.meja) : ""} · ${esc(p.jam)}</div>
+        <div>${p.items.map((i) => `${i.qty}× ${esc(i.id)}${i.varian ? " (" + esc(i.varian) + ")" : ""}`).join(", ")}</div>
+        ${p.catatan ? `<div><small>Catatan: ${esc(p.catatan)}</small></div>` : ""}
+        <div><strong>${idr(p.total)}</strong>${p.voucher ? ` <small>voucher ${esc(p.voucher)} −${idr(p.potong)}</small>` : ""}</div>
+        <div class="aksi">${["diproses", "siap", "selesai", "batal"].map((s) => `<button type="button" data-set="${s}"${p.status === s ? ' aria-pressed="true"' : ""}>${LABEL[s]}</button>`).join("")}</div></li>`).join("") || "<li class='kecil'>Belum ada pesanan.</li>";
+    } catch (e) { info.textContent = "Gagal memuat: " + e.message; info.className = "err"; }
+  }
+  $("#muat").addEventListener("click", muat);
+  $("#auto").addEventListener("click", (e) => {
+    const on = e.currentTarget.getAttribute("aria-pressed") !== "true";
+    e.currentTarget.setAttribute("aria-pressed", String(on));
+    clearInterval(timer); if (on) { muat(); timer = setInterval(muat, 10000); }
+  });
+  $("#daftar").addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-set]"); if (!b) return;
+    const kode = b.closest("[data-kode]").dataset.kode;
+    const r = await fetch(base() + "/api/status", { method: "POST", headers: head(), body: JSON.stringify({ kode, status: b.dataset.set }) });
+    if (!r.ok) { $("#info").textContent = "Gagal mengubah status"; $("#info").className = "err"; return; }
+    muat();
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "Calibre Coffee Roasters (studi desain)",
+  "short_name": "Calibre",
+  "description": "Rancangan studi desain independen: menu, kunjungan, dan pesanan lewat WhatsApp.",
+  "start_url": "index.html?langsung",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#EEECE3",
+  "theme_color": "#292C25",
+  "lang": "id",
+  "icons": [{ "src": "assets/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

@@ -1,0 +1,7 @@
+{
+  "name": "calibre-pembayaran",
+  "private": true,
+  "version": "0.1.0",
+  "engines": { "node": ">=18" },
+  "description": "Backend pembayaran Midtrans Snap untuk situs studi Calibre. Belum aktif sampai akun merchant dan harga resmi tersedia."
+}

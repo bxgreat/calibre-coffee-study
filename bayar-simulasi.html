@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Pembayaran (simulasi) | Calibre</title>
+  <style>
+    :root { --krem: #EEECE3; --arang: #292C25; --zaitun: #525B3E; --hijau: #BDC89E; --tanah: #995432; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 16px; font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--krem); color: var(--arang); }
+    main { max-width: 560px; margin: 0 auto; display: grid; gap: 16px; }
+    .sim { padding: 12px 14px; background: var(--tanah); color: #fff; font-weight: 700; border-radius: 6px; }
+    h1 { font-size: 1.5rem; margin: 0; }
+    .total { font-size: 2rem; font-weight: 800; margin: 0; }
+    .grup { margin: 0; padding: 0; border: 0; display: grid; gap: 8px; }
+    .grup legend { font-weight: 800; margin-bottom: 6px; padding: 0; }
+    .m { display: block; }
+    .m input { position: absolute; opacity: 0; }
+    .m span { display: flex; align-items: center; min-height: 52px; padding: 0 14px; border: 2px solid var(--arang); border-radius: 6px; background: #fff; cursor: pointer; font-weight: 600; }
+    .m input:checked + span { background: var(--arang); color: var(--krem); }
+    .m input:focus-visible + span { outline: 3px solid var(--tanah); outline-offset: 2px; }
+    button { min-height: 52px; padding: 0 18px; font: inherit; font-weight: 700; border: 2px solid var(--zaitun); border-radius: 6px; background: var(--zaitun); color: #fff; cursor: pointer; }
+    button[disabled] { opacity: .5; cursor: not-allowed; }
+    a.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 18px; border-radius: 6px; font-weight: 700; background: var(--zaitun); color: #fff; text-decoration: none; }
+    .kotak { padding: 14px; background: #fff; border: 2px dashed var(--arang); border-radius: 6px; display: grid; gap: 6px; }
+    .qr { width: 160px; height: 160px; background: repeating-conic-gradient(var(--arang) 0 25%, #fff 0 50%) 0 0 / 20px 20px; border: 8px solid #fff; outline: 2px solid var(--arang); justify-self: center; }
+    .va { font: 700 1.4rem ui-monospace, Consolas, monospace; letter-spacing: .05em; }
+    .kecil { color: #4A4E43; font-size: .9375rem; }
+    .err { color: #8E2A1B; font-weight: 700; }
+    .ok { padding: 14px; background: var(--hijau); border-radius: 6px; font-weight: 700; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+<main>
+  <p class="sim" role="note">SIMULASI: tidak ada uang yang dibayarkan. Halaman ini menggantikan gateway pembayaran untuk menguji alurnya.</p>
+  <h1>Pilih cara bayar</h1>
+  <p class="kecil">Pesanan <strong id="kode">-</strong></p>
+  <p class="total" id="total" aria-live="polite">...</p>
+  <p id="err" class="err" role="alert" hidden></p>
+
+  <form id="form" hidden>
+    <fieldset class="grup"><legend>QRIS</legend>
+      <label class="m"><input type="radio" name="m" value="qris"><span>QRIS (semua aplikasi bank dan e-wallet)</span></label></fieldset>
+    <fieldset class="grup"><legend>Virtual Account bank</legend>
+      <label class="m"><input type="radio" name="m" value="bca_va"><span>BCA Virtual Account</span></label>
+      <label class="m"><input type="radio" name="m" value="bni_va"><span>BNI Virtual Account</span></label>
+      <label class="m"><input type="radio" name="m" value="bri_va"><span>BRI Virtual Account</span></label>
+      <label class="m"><input type="radio" name="m" value="mandiri_va"><span>Mandiri Bill Payment</span></label>
+      <label class="m"><input type="radio" name="m" value="permata_va"><span>Permata Virtual Account</span></label></fieldset>
+    <fieldset class="grup"><legend>E-wallet</legend>
+      <label class="m"><input type="radio" name="m" value="gopay"><span>GoPay</span></label>
+      <label class="m"><input type="radio" name="m" value="shopeepay"><span>ShopeePay</span></label>
+      <label class="m"><input type="radio" name="m" value="dana"><span>DANA</span></label>
+      <label class="m"><input type="radio" name="m" value="ovo"><span>OVO</span></label></fieldset>
+    <fieldset class="grup"><legend>Kartu dan gerai</legend>
+      <label class="m"><input type="radio" name="m" value="kartu"><span>Kartu kredit atau debit</span></label>
+      <label class="m"><input type="radio" name="m" value="indomaret"><span>Indomaret</span></label>
+      <label class="m"><input type="radio" name="m" value="alfamart"><span>Alfamart</span></label></fieldset>
+  </form>
+
+  <section id="langkah" class="kotak" hidden aria-live="polite"></section>
+  <button id="bayar" type="button" hidden disabled>Saya sudah membayar (simulasi)</button>
+
+  <p id="sukses" class="ok" role="status" hidden>Pembayaran berhasil (simulasi). Pesanan Anda sudah ditandai lunas.</p>
+  <a id="kembali" class="btn" href="index.html" hidden>Kembali ke pesanan</a>
+</main>
+<script>
+(function () {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+  const q = new URLSearchParams(location.search);
+  const kode = q.get("kode") || "", api = (q.get("api") || "").replace(/\/$/, "");
+  const idr = (n) => "Rp " + Math.round(n).toLocaleString("id-ID");
+  const NAMA = { qris: "QRIS", bca_va: "BCA Virtual Account", bni_va: "BNI Virtual Account", bri_va: "BRI Virtual Account", mandiri_va: "Mandiri Bill Payment", permata_va: "Permata Virtual Account", gopay: "GoPay", shopeepay: "ShopeePay", dana: "DANA", ovo: "OVO", kartu: "kartu kredit atau debit", indomaret: "Indomaret", alfamart: "Alfamart" };
+  let total = 0, metode = "";
+  $("#kode").textContent = kode || "-";
+  $("#kembali").href = "index.html?langsung&kode=" + encodeURIComponent(kode) + "#/pesan";
+
+  function galat(t) { const e = $("#err"); e.textContent = t; e.hidden = false; }
+  const acak = (n) => Array.from({ length: n }, () => Math.floor(Math.random() * 10)).join("");
+
+  async function muat() {
+    if (!kode || !api) return galat("Tautan tidak lengkap. Buka halaman ini dari tombol Bayar online di situs.");
+    try {
+      const r = await fetch(api + "/api/status?kode=" + encodeURIComponent(kode));
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || r.status);
+      total = j.total; $("#total").textContent = idr(total);
+      if (j.bayar === "lunas") { $("#sukses").hidden = false; $("#kembali").hidden = false; return; }
+      $("#form").hidden = false;
+    } catch (e) { galat("Gagal memuat pesanan: " + e.message); }
+  }
+
+  $("#form").addEventListener("change", (e) => {
+    metode = e.target.value;
+    const k = $("#langkah"); k.hidden = false;
+    const n = NAMA[metode];
+    if (metode === "qris") k.innerHTML = `<strong>Pindai kode QRIS</strong><div class="qr" role="img" aria-label="Kode QR contoh"></div><span class="kecil">Kode di atas hanya gambar contoh. Dalam pembayaran sungguhan, buka aplikasi bank atau e-wallet lalu pindai kode dari gateway.</span>`;
+    else if (/_va$/.test(metode)) k.innerHTML = `<strong>Transfer ke ${n}</strong><span class="va">8077 ${acak(4)} ${acak(4)}</span><span class="kecil">Nomor contoh, bukan rekening sungguhan. Jumlah: ${idr(total)}.</span>`;
+    else if (metode === "kartu") k.innerHTML = `<strong>Kartu kredit atau debit</strong><span class="kecil">Pada pembayaran sungguhan, formulir kartu dan verifikasi 3-D Secure tampil di sini. Jangan memasukkan data kartu asli pada halaman simulasi ini.</span>`;
+    else if (metode === "indomaret" || metode === "alfamart") k.innerHTML = `<strong>Bayar di ${n}</strong><span class="va">${acak(12)}</span><span class="kecil">Kode bayar contoh. Tunjukkan kode ke kasir gerai pada pembayaran sungguhan.</span>`;
+    else k.innerHTML = `<strong>Buka aplikasi ${n}</strong><span class="kecil">Pada pembayaran sungguhan, Anda diarahkan ke aplikasi ${n} untuk menyetujui ${idr(total)}.</span>`;
+    $("#bayar").hidden = false; $("#bayar").disabled = false;
+  });
+
+  $("#bayar").addEventListener("click", async () => {
+    const b = $("#bayar"); b.disabled = true;
+    try {
+      const r = await fetch(api + "/api/simulasi", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kode, metode }) });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || r.status);
+      $("#form").hidden = true; $("#langkah").hidden = true; b.hidden = true;
+      $("#sukses").textContent = "Pembayaran berhasil (simulasi) lewat " + NAMA[metode] + ". Pesanan Anda ditandai lunas.";
+      $("#sukses").hidden = false; $("#kembali").hidden = false; $("#kembali").focus();
+    } catch (e) { b.disabled = false; galat("Gagal: " + e.message); }
+  });
+  muat();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "_petunjuk": "Dihasilkan oleh tools/sync-menu.js dari js/menu-data.js. Jangan edit manual; ubah sumbernya lalu jalankan ulang. Varian = '' untuk tanpa varian.",
+  "_ekstra": {
+    "Extra shot": 8000,
+    "Oat milk": 8000
+  }
+}

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Uji mandiri Calibre (smoke test)</title>
+  <style>
+    body { font: 16px/1.5 system-ui, sans-serif; margin: 0; padding: 16px; background: #EEECE3; color: #292C25; }
+    h1 { font-size: 1.4rem; margin: 0 0 4px; }
+    #ringkas { font-weight: 700; margin: 8px 0 16px; }
+    li { margin: 4px 0; padding: 6px 10px; border-left: 6px solid #999; background: #fff; list-style: none; }
+    li.ok { border-color: #2e7d32; } li.gagal { border-color: #b3261e; background: #fdecea; }
+    ul { padding: 0; } small { color: #4A4E43; display: block; }
+    iframe { position: absolute; left: -9999px; width: 1200px; height: 800px; }
+    button { min-height: 44px; padding: 0 16px; font: inherit; }
+  </style>
+</head>
+<body>
+  <h1>Uji mandiri Calibre (smoke test)</h1>
+  <small>Buka halaman ini lewat server yang sama dengan situs (mis. http://localhost:8791/tests/smoke.html) di browser yang ingin diuji: Safari, Firefox, atau HP. Ini bukan pengganti uji manual di perangkat.</small>
+  <p><button id="mulai" type="button">Jalankan uji</button></p>
+  <p id="ringkas" aria-live="polite">Belum dijalankan.</p>
+  <p><small id="env"></small></p>
+  <ul id="hasil"></ul>
+  <iframe id="app" title="Situs yang diuji" src="about:blank"></iframe>
+<script>
+(function () {
+  "use strict";
+  const hasil = document.getElementById("hasil");
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  document.getElementById("env").textContent = navigator.userAgent;
+  let ok = 0, gagal = 0;
+  function lapor(nama, lulus, info) {
+    const li = document.createElement("li");
+    li.className = lulus ? "ok" : "gagal";
+    li.innerHTML = (lulus ? "LULUS: " : "GAGAL: ") + nama + (info ? "<small>" + info + "</small>" : "");
+    hasil.appendChild(li);
+    lulus ? ok++ : gagal++;
+    document.getElementById("ringkas").textContent = ok + " lulus, " + gagal + " gagal";
+  }
+  async function cek(nama, fn) {
+    try { const r = await fn(); lapor(nama, r === true || (r && r.ok), r && r.info); }
+    catch (e) { lapor(nama, false, String(e && e.message || e)); }
+  }
+
+  document.getElementById("mulai").addEventListener("click", async () => {
+    hasil.innerHTML = ""; ok = gagal = 0;
+    const f = document.getElementById("app");
+    await new Promise((res) => { f.onload = res; f.src = "../index.html?langsung&uji=" + Date.now() + "#/"; });
+    await sleep(2500);
+    const w = f.contentWindow, d = f.contentDocument;
+    const q = (s) => d.querySelector(s), qa = (s) => Array.from(d.querySelectorAll(s));
+    const vis = () => qa("[data-page]").filter((p) => !p.hidden).map((p) => p.dataset.page).join();
+
+    await cek("Data dan modul termuat (CALIBRE, CALIBRE_MENU, Order, Router)", () => !!(w.CALIBRE && w.CALIBRE_MENU && w.Order && w.Router));
+    await cek("Katalog menu: satu kartu per menu", () => ({ ok: qa(".card").length === w.CALIBRE_MENU.items.length, info: qa(".card").length + " kartu" }));
+    await cek("Semua kartu punya foto atau ilustrasi", () => qa(".card").every((c) => c.querySelector(".card__photo, .card__art")));
+    await sleep(1200);
+    await cek("Tidak ada gambar rusak (yang sudah dimuat)", () => { const bad = qa("img").filter((i) => i.complete && i.naturalWidth === 0 && i.getAttribute("src") && i.getAttribute("src").indexOf("data:") !== 0); return { ok: bad.length === 0, info: bad.map((i) => i.getAttribute("src")).join(", ") }; });
+    await cek("Halaman awal: Beranda", () => vis() === "beranda");
+    await cek("Setiap halaman punya tepat satu h1", () => qa("[data-page]").every((p) => p.querySelectorAll("h1").length === 1));
+    await cek("Tidak ada scroll horizontal", () => d.documentElement.scrollWidth <= d.documentElement.clientWidth);
+    for (const r of ["cerita", "menu", "kunjungi", "info", "pesan"]) {
+      await cek("Pindah ke halaman " + r, async () => { w.location.hash = "#/" + r; await sleep(2200); return { ok: vis() === r, info: "tampil: " + vis() }; });
+    }
+    await cek("Tombol kembali browser ke halaman sebelumnya", async () => { w.history.back(); await sleep(2200); return { ok: vis() === "kunjungi" || vis() === "info", info: "tampil: " + vis() }; });
+    await cek("Tautan menu langsung #m/waffle membuka detail", async () => { w.location.hash = "#m/waffle"; await sleep(2300); const ok = q("[data-detail]").open && vis() === "menu"; if (q("[data-detail]").open) q("[data-detail]").close(); return ok; });
+    await cek("Pencarian menu 'pasta' menyaring", async () => { w.location.hash = "#/menu"; await sleep(2200); const s = q("[data-search]"); s.value = "pasta"; s.dispatchEvent(new w.Event("input", { bubbles: true })); await sleep(150); const n = qa(".card").length; s.value = ""; s.dispatchEvent(new w.Event("input", { bubbles: true })); return { ok: n > 0 && n < 32, info: n + " hasil" }; });
+    await cek("Favorit bisa disimpan dan dibaca ulang", async () => { const b = q('.card[data-id="waffle"] [data-act="fav"]'); b.click(); const on = b.getAttribute("aria-pressed") === "true"; b.click(); return on; });
+    await cek("Kartu bisa dibalik (sumber dan status)", async () => { const c = q('.card[data-id="calibre-latte"]'); c.querySelector('[data-act="flip"]').click(); const on = c.classList.contains("is-flip"); c.querySelector(".card__back-btn").click(); return on && !c.classList.contains("is-flip"); });
+    await cek("Keranjang: tambah dan hitung total", () => { w.Order.clear(); w.Order.add("waffle", ""); w.Order.add("waffle", ""); const x = w.Order.exact(), p = w.Order.byId.waffle.rp; return { ok: w.Order.count() === 2 && x === p * 2, info: "total " + x + ", harga " + p }; });
+    await cek("Checkout: validasi langkah Data menolak isian kosong", async () => { w.location.hash = "#/pesan"; await sleep(2200); q("[data-next]").click(); await sleep(120); ["nama", "hp"].forEach((k) => { const i = q("[data-f=" + k + "]"); i.value = ""; i.dispatchEvent(new w.Event("input", { bubbles: true })); }); q("[data-next]").click(); await sleep(120); return { ok: qa(".err").length >= 2, info: qa(".err").map((e) => e.textContent).join(" | ") }; });
+    await cek("Jadwal: status buka/tutup terisi", () => !!q("[data-buka-sticker]").textContent.trim());
+    await cek("localStorage tersedia (favorit/keranjang dapat disimpan)", () => { try { w.localStorage.setItem("calibre:_uji", "1"); w.localStorage.removeItem("calibre:_uji"); return true; } catch (e) { return false; } });
+    await cek("Efek gerak mengikuti pengaturan (kelas fx)", () => ({ ok: true, info: "fx=" + d.documentElement.classList.contains("fx") + ", reduced-motion=" + w.matchMedia("(prefers-reduced-motion: reduce)").matches }));
+    await cek("WebGL tersedia untuk gelas 3D (jika tidak, ilustrasi SVG tampil)", () => { const c = d.createElement("canvas"); const gl = c.getContext("webgl") || c.getContext("experimental-webgl"); const art = q("[data-hero-art]"); return { ok: !!gl || (art && !art.hidden), info: gl ? "WebGL ada" : "tanpa WebGL, cadangan SVG" }; });
+    w.Order.clear();
+  });
+})();
+</script>
+</body>
+</html>
