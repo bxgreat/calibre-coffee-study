@@ -144,3 +144,8 @@ Navbar didesain ulang agar seimbang: bar gelap (arang) dengan bayangan keras hij
 - **Notifikasi pesanan siap**: status langsung di halaman Pesan (polling 12 detik), toast, getar, Notification API.
 - **Voucher** (`js/voucher.js`) dan **paket langganan** (kategori di katalog); semuanya contoh sampai disetujui kedai.
 - **Bahasa Inggris** (`js/i18n.js`, tombol EN/ID): antarmuka diterjemahkan; deskripsi menu dan catatan sumber tetap Indonesia.
+
+## v16: navbar ponsel dropdown, hosting
+- Navbar ponsel: satu dropdown (akordeon Menu dan Info, aksi WhatsApp, Telepon, bahasa, tema); bar aksi bawah dihapus; tombol Pesanan ada di header.
+- Audit tata letak ponsel: `tests/audit-mobile.js` (overflow, target sentuh, teks kecil).
+- Hosting gratis di GitHub Pages: lihat DEPLOY.md.
