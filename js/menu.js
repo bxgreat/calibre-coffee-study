@@ -100,7 +100,7 @@
             <div class="card__body">
               <p class="card__meta"><span class="card__kat">${esc(it.katLabel)}</span>
                 <button type="button" class="tag tag--${it.status} tag--btn" data-act="flip" aria-label="Lihat sumber dan status ${esc(it.nama)}"><span class="stat stat--${s.bentuk}" aria-hidden="true"></span>${esc(s.singkat)}</button></p>
-              <h2 class="card__nama">${esc(it.nama)}</h2>
+              <h2 class="card__nama" data-act="detail">${esc(it.nama)}</h2>
               <p class="card__desk">${esc(it.deskripsi)}</p>
               ${it.tag && it.tag.length ? `<p class="card__tags">${it.tag.map((x) => `<span>${esc(x)}</span>`).join("")}</p>` : ""}
               <div class="card__aksi">

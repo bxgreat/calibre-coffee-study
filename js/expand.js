@@ -16,7 +16,10 @@
   const clamp = (n, a, b) => Math.min(Math.max(n, a), b);
   let raf = 0;
 
-  const motion = () => !mqReduce.matches && !(window.FX && !window.FX.enabled());
+  // Ponsel dan layar sentuh: tata letak statis. Animasi ini mengubah lebar dan tinggi foto besar pada setiap frame scroll
+  // (memicu layout ulang), terlalu berat untuk HP dan membuat halaman patah-patah.
+  const mqSmall = window.matchMedia("(max-width: 899px), (pointer: coarse)");
+  const motion = () => !mqReduce.matches && !mqSmall.matches && !(window.FX && !window.FX.enabled());
 
   function update() {
     raf = 0;
@@ -49,6 +52,7 @@
   window.addEventListener("scroll", schedule, { passive: true });
   window.addEventListener("resize", schedule);
   mqReduce.addEventListener("change", update);
+  mqSmall.addEventListener("change", update);
   if (window.FX) window.FX.onChange(update);
   update();
   window.Expand = { update };

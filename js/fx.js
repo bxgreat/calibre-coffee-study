@@ -238,7 +238,7 @@
       ticking = false;
       const max = document.documentElement.scrollHeight - window.innerHeight;
       if (bar) bar.style.transform = `scaleX(${max > 0 ? Math.min(window.scrollY / max, 1).toFixed(4) : 0})`;
-      if (!enabled()) return;
+      if (!enabled() || window.matchMedia("(pointer: coarse)").matches) return; // parallax membaca layout tiap frame; dilewati di layar sentuh agar scroll mulus
       const vh = window.innerHeight;
       paraX.forEach((el) => {
         const r = el.getBoundingClientRect();

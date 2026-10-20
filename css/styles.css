@@ -1625,6 +1625,43 @@ html[data-waktu="malam"] .menu-bar [data-finder-open] { background: #E0955F; bor
   .menu-bar__row .sel { flex: 1 1 100%; justify-content: space-between; }
   .menu-bar__row .sel select { flex: 1; text-align: right; }
 }
+
+/* ============ v18: performa dan tata letak ponsel ============ */
+/* Cerita: hero statis (ponsel, layar sentuh, gerak dikurangi): judul tampil sebagai heading biasa di atas foto */
+.expand.is-static { height: auto; }
+.expand.is-static .expand__pin { position: relative; height: auto; min-height: 0; display: grid; gap: var(--s-3); justify-items: center; align-content: start; padding: var(--s-5) var(--gutter); }
+.expand.is-static .expand__bg { display: none; }
+.expand.is-static .expand__title { display: flex; position: static; translate: none; opacity: 1; order: 1; font-size: clamp(2.6rem, 13vw, 5rem); }
+.expand.is-static .expand__l, .expand.is-static .expand__r { transform: none; }
+.expand.is-static .expand__date { display: block; position: static; opacity: 1; order: 2; margin: 0; }
+.expand.is-static .expand__hint { display: none; }
+.expand.is-static .expand__media { order: 3; width: min(100%, 680px); height: auto; aspect-ratio: 4 / 3; box-shadow: none; }
+.expand.is-static .expand__shade { opacity: 0; }
+.expand.is-static .expand__caption { order: 4; position: static; translate: none; opacity: 1; width: min(100%, 680px); margin: 0; }
+
+/* Menu di ponsel: dua kolom, kartu ringkas. Balik kartu 3D dimatikan (berat di HP) */
+@media (max-width: 639px) {
+  .catalog { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .catalog__item { min-width: 0; }
+  .card__flip { transform-style: flat; transition: none; }
+  .card__face--back { display: none; }
+  .card__media { aspect-ratio: 1 / 1; }
+  .card__media .price { right: 6px; top: 6px; padding: .15rem .45rem; font-size: .75rem; }
+  .card__fototag { font-size: .6875rem; padding: .1rem .4rem; }
+  .search__saran button { min-height: 40px; }
+  .card__badge { left: 6px; top: 6px; font-size: .625rem; padding: .1rem .4rem; }
+  .card__body { padding: 10px 4px 4px; gap: 6px; }
+  .card__meta, .card__desk, .card__tags { display: none; }
+  .card__nama { font-size: 1.1rem; line-height: 1.08; cursor: pointer; }
+  .card__aksi { padding-top: 2px; gap: 6px; }
+  .card__aksi [data-act="detail"] { display: none; }
+  .card__aksi .btn--primary:not([disabled]) { flex: 1; font-size: 0; padding: 0; justify-content: center; }
+  .card__aksi .btn--primary:not([disabled])::before { content: "+"; font-size: 1.6rem; line-height: 1; font-weight: 500; }
+  .card__aksi .btn--primary[disabled] { flex: 1; justify-content: center; }
+  .card__aksi .icon-btn { flex: none; }
+  .card:hover .card__photo, .card:hover .card__art .art { transform: none; }
+}
+@media (pointer: coarse) { html.fx [data-parallax] { will-change: auto; } }
 /* ---------- Gerak dikurangi ---------- */
 
 @media (prefers-reduced-motion: reduce) {
