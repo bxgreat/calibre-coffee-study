@@ -1,0 +1,3 @@
+# Rancangan studi desain independen, belum untuk diindeks.
+User-agent: *
+Disallow: /
