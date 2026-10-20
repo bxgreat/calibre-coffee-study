@@ -62,10 +62,12 @@
     if (!M) return "";
     const n = (id) => M.items.filter((i) => i.kategori === id).length;
     return `<a class="dd__a dd__a--all" href="#/menu" data-kat="semua"><span>Semua menu</span><small>${M.items.length}</small></a>` +
-      M.kategori.filter((k) => n(k.id)).map((k) => `<a class="dd__a" href="#/menu" data-kat="${esc(k.id)}"><span>${esc(k.label)}</span><small>${n(k.id)}</small></a>`).join("") +
+      M.kategori.filter((k) => n(k.id)).map((k) => `<a class="dd__a" href="#/menu" data-kat="${esc(k.id)}"><i class="dd__dot dd__dot--${esc(k.id)}" aria-hidden="true"></i><span>${esc(k.label)}</span><small>${n(k.id)}</small></a>`).join("") +
       `<button type="button" class="dd__a dd__a--aksi" data-dd-finder><span>Bingung pilih? Tanya barista</span></button>`;
   }
-  const INFO = '<a class="dd__a" href="#fasilitas"><span>Fasilitas</span></a><a class="dd__a" href="#faq"><span>Pertanyaan umum</span></a><a class="dd__a" href="#tentang"><span>Transparansi</span></a>';
+  const INFO = '<a class="dd__a dd__a--rich" href="#fasilitas"><span class="dd__t"><b>Fasilitas</b><em>AC, Wi-Fi, parkir, dari sumber</em></span></a>' +
+    '<a class="dd__a dd__a--rich" href="#faq"><span class="dd__t"><b>Pertanyaan umum</b><em>Jam buka, cara pesan, kontak</em></span></a>' +
+    '<a class="dd__a dd__a--rich" href="#tentang"><span class="dd__t"><b>Transparansi</b><em>Sumber data dan privasi</em></span></a>';
 
   function pasang(spy, id, html) {
     const link = header.querySelector('.nav__link[data-spy="' + spy + '"]');

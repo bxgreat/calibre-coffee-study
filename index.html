@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Instrument+Serif:ital@1&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=36">
+  <link rel="stylesheet" href="css/styles.css?v=40">
 <script>try{var m=localStorage.getItem("calibre:tema:v1")||"auto",d=new Date(),mnt=d.getHours()*60+d.getMinutes(),w=m==="terang"?"siang":m==="gelap"?"malam":(mnt>=360&&mnt<1050?"siang":"malam");document.documentElement.dataset.waktu=w}catch(e){document.documentElement.dataset.waktu="siang"}try{var h=location.hash;if(!sessionStorage.getItem("calibre:masuk")&&!matchMedia("(prefers-reduced-motion: reduce)").matches&&localStorage.getItem("calibre:fx")!=="false"&&(h===""||h==="#"||h==="#/")&&!/[?&](langsung|table|meja|kode)/.test(location.search))document.documentElement.classList.add("landing-on")}catch(e){}</script>
 </head>
 <body>
@@ -266,43 +266,42 @@
         </div>
 
         <div class="racikan" data-racikan hidden></div>
-        <div class="menu-tools" role="search" aria-label="Cari dan atur menu">
-          <div class="search">
-            <label class="sr-only" for="menu-cari">Cari menu berdasarkan nama atau kategori</label>
-            <svg class="search__ico" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            <input id="menu-cari" type="search" placeholder="Cari nama atau kategori menu" autocomplete="off" spellcheck="false" data-search>
-            <button class="search__clear" type="button" aria-label="Hapus pencarian" hidden data-search-clear>
-              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            </button>
+        <div class="menu-bar">
+          <div class="menu-tools" role="search" aria-label="Cari dan atur menu">
+            <div class="search">
+              <label class="sr-only" for="menu-cari">Cari menu berdasarkan nama atau kategori</label>
+              <svg class="search__ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><circle cx="10.500" cy="10.500" r="6.500" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.500 15.500 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <input id="menu-cari" type="search" placeholder="Cari nama atau kategori menu" autocomplete="off" spellcheck="false" data-search>
+              <kbd class="search__kbd" aria-hidden="true">/</kbd>
+              <button class="search__clear" type="button" aria-label="Hapus pencarian" hidden data-search-clear>
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+            <span data-finder-slot></span>
           </div>
-          <div class="menu-tools__row">
-            <div class="field">
-              <label for="menu-sort">Urutkan</label>
+          <p class="search__saran" data-saran><span>Coba:</span> <button type="button" data-q="latte">latte</button> <button type="button" data-q="pasta">pasta</button> <button type="button" data-q="es">es</button> <button type="button" data-q="croissant">croissant</button> <button type="button" data-q="teh">teh</button></p>
+          <div class="tabs" role="group" aria-label="Kategori menu" data-tabs></div>
+          <div class="menu-bar__row">
+            <div class="sel"><label for="menu-sort">Urutkan</label>
               <select id="menu-sort" data-sort>
                 <option value="asli">Per kategori</option>
                 <option value="az">Abjad A ke Z</option>
                 <option value="za">Abjad Z ke A</option>
                 <option value="murah">Harga termurah</option>
                 <option value="mahal">Harga termahal</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="menu-status">Status</label>
+              </select></div>
+            <div class="sel"><label for="menu-status">Status</label>
               <select id="menu-status" data-status-filter>
                 <option value="semua">Semua status</option>
                 <option value="terkini">Terkini</option>
                 <option value="historis">Historis</option>
                 <option value="belum">Belum pasti</option>
-              </select>
-            </div>
-            <span data-finder-slot></span>
-            <button class="btn btn--ghost btn--sm" type="button" aria-pressed="false" data-fav-toggle>Favorit Saya <span class="count" data-fav-count>0</span></button>
-            <button class="btn btn--ghost btn--sm" type="button" data-print>Cetak daftar menu</button>
+              </select></div>
+            <button class="chipbtn" type="button" aria-pressed="false" data-fav-toggle><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20.500s-7.500-4.600-9.200-9.200C1.600 8 3.400 4.800 6.700 4.800c2 0 3.500 1.100 5.300 3.100 1.800-2 3.300-3.100 5.300-3.100 3.300 0 5.100 3.200 3.900 6.500-1.700 4.600-9.200 9.200-9.200 9.200z"/></svg> Favorit Saya <span class="count" data-fav-count>0</span></button>
+            <button class="chipbtn chipbtn--kanan" type="button" data-print><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 9V4h10v5 M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2 M7 14h10v6H7z"/></svg> Cetak daftar menu</button>
           </div>
         </div>
-
-        <div class="tabs" role="group" aria-label="Kategori menu" data-tabs></div>
-        <p class="menu__hasil" role="status" aria-live="polite" data-hasil></p>
+        <div class="menu__bar-hasil"><p class="menu__hasil" role="status" aria-live="polite" data-hasil></p><button type="button" class="link-btn" data-reset-btn hidden>Reset pencarian dan filter</button></div>
 
         <ul class="catalog" data-catalog></ul>
         <div class="menu__kosong" hidden data-kosong></div>
@@ -535,7 +534,7 @@
   <script defer src="js/sheet.js?v=4"></script>
   <script defer src="js/landing.js?v=2"></script>
   <script defer src="js/waktu.js?v=2"></script>
-  <script defer src="js/i18n.js?v=10"></script>
+  <script defer src="js/i18n.js?v=11"></script>
   <script defer src="js/art.js?v=8"></script>
   <script defer src="js/ui.js?v=8"></script>
   <script defer src="js/router.js?v=9"></script>
@@ -544,12 +543,12 @@
   <script defer src="js/checkout.js?v=17"></script>
   <script defer src="js/profil.js?v=2"></script>
   <script defer src="js/custom.js?v=2"></script>
-  <script defer src="js/menu.js?v=15"></script>
+  <script defer src="js/menu.js?v=16"></script>
   <script defer src="js/ruang.js?v=2"></script>
   <script defer src="js/finder.js?v=1"></script>
   <script defer src="js/racikan.js?v=1"></script>
   <script defer src="js/pwa.js?v=1"></script>
-  <script defer src="js/navx.js?v=3"></script>
+  <script defer src="js/navx.js?v=4"></script>
   <script defer src="js/main.js?v=8"></script>
   <script defer src="js/extras.js?v=9"></script>
   <script defer src="js/fx.js?v=9"></script>

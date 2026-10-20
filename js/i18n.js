@@ -158,6 +158,7 @@
     "Buka submenu": "Open submenu", "Semua menu": "All items", "Bingung pilih? Tanya barista": "Can't decide? Ask the barista", "Pertanyaan umum": "Common questions", "Fasilitas": "Facilities", "Transparansi": "Transparency",
     "Lewati intro": "Skip intro", "Kopi baik, jeda sejenak.": "Good coffee, a short pause.", "Pembuka Calibre Coffee Roasters": "Calibre Coffee Roasters intro", "Rancangan studi desain independen, bukan situs resmi Calibre.": "Independent design study, not the official Calibre site.",
     "Telepon": "Call", "WhatsApp": "WhatsApp",
+    "Coba:": "Try:", "Reset pencarian dan filter": "Reset search and filters", "AC, Wi-Fi, parkir, dari sumber": "AC, Wi-Fi, parking, from sources", "Jam buka, cara pesan, kontak": "Opening hours, how to order, contact", "Sumber data dan privasi": "Data sources and privacy",
     // Footer
     "Efek gerak: aktif": "Motion effects: on", "Efek gerak: mati": "Motion effects: off", "Halaman Pesan": "Order page"
   };

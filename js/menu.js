@@ -37,7 +37,8 @@
     hasil: $("[data-hasil]"),
     kosong: $("[data-kosong]"),
     arsip: $("[data-arsip]"),
-    detail: $("[data-detail]")
+    detail: $("[data-detail]"),
+    resetBtn: $("[data-reset-btn]")
   };
 
   $("[data-menu-total]").textContent = String(items.length);
@@ -192,6 +193,7 @@
       el.kosong.innerHTML = "";
     }
     el.clear.hidden = !state.q;
+    if (el.resetBtn) el.resetBtn.hidden = !(state.q || state.kat !== "semua" || state.status !== "semua" || state.favOnly || state.sort !== "asli");
     el.favBtn.setAttribute("aria-pressed", String(state.favOnly));
     el.favCount.textContent = String(favs.size);
     $$("[data-kat]", el.tabs).forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.kat === state.kat)));
@@ -320,6 +322,18 @@
   el.status.addEventListener("change", () => { state.status = el.status.value; render(); });
   el.favBtn.addEventListener("click", () => { state.favOnly = !state.favOnly; render(); });
   $("[data-print]").addEventListener("click", printMenu);
+  // Saran pencarian cepat, tombol reset, dan pintasan "/" untuk fokus ke kolom cari (hanya di halaman Menu)
+  const saran = $("[data-saran]");
+  if (saran) saran.addEventListener("click", (e) => { const b = e.target.closest("[data-q]"); if (!b) return; el.search.value = b.dataset.q; state.q = b.dataset.q; render(); el.search.focus(); });
+  if (el.resetBtn) el.resetBtn.addEventListener("click", resetAll);
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey) return;
+    const t = e.target;
+    if ((t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) || (t && t.isContentEditable)) return;
+    const pg = $('[data-page="menu"]');
+    if (!pg || pg.hidden) return;
+    e.preventDefault(); el.search.focus();
+  });
 
   el.kosong.addEventListener("click", (e) => { if (e.target.closest('[data-act="reset"]')) resetAll(); });
 
